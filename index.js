@@ -299,16 +299,6 @@ export function apply(ctx) {
           models: await buildCatalog(),
         })
       }
-      if (req.method === 'POST' && action === 'hello') {
-        // The Web UI announces itself once per module load: the settings page and
-        // the composer chip cannot be exercised without a browser, so this is the
-        // one place a maintainer can see that the page reached the Host face.
-        const body = await readJson(req)
-        const file = path.join(path.dirname(dataFile()), 'subagent-models.client.json')
-        await mkdir(path.dirname(file), { recursive: true })
-        await writeFile(file, `${JSON.stringify({ at: new Date().toISOString(), ...body }, null, 2)}\n`, 'utf8')
-        return sendJson(res, 200, { ok: true })
-      }
       return sendJson(res, 404, { ok: false, error: `unknown action: ${action}` })
     } catch (error) {
       return sendJson(res, 400, { ok: false, error: error?.message ?? String(error) })

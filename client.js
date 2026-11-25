@@ -2,8 +2,8 @@
  * Subagent models — Web UI.
  *
  * ONE entry: the chip beside the composer. It opens a frame-wide card with two
- * scopes over the same two controls — 「本对话」(this conversation's override)
- * and 「全局默认」(the profile-wide default) — and never anywhere else: no
+ * scopes over the same two controls — 「This session」(this conversation's override)
+ * and 「Global default」(the profile-wide default) — and never anywhere else: no
  * settings page, so there is no second place to look for the value.
  *
  * The card and its pickers follow DSH's own composer model menu: menu material,
@@ -211,7 +211,7 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
     }
 
     function routeText(route) {
-      if (!route) return '跟随主会话'
+      if (!route) return 'Follow main session'
       return route.effort ? `${route.model} · ${route.effort}` : route.model
     }
 
@@ -219,7 +219,7 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
       const query = sessionId ? `?sessionId=${encodeURIComponent(sessionId)}` : ''
       const response = await fetch(`${ENDPOINT}/state${query}`, { headers: { accept: 'application/json' } })
       const body = await response.json().catch(() => null)
-      if (!response.ok || !body?.ok) throw new Error(body?.error ?? `请求失败（${response.status}）`)
+      if (!response.ok || !body?.ok) throw new Error(body?.error ?? `Request failed (${response.status}）`)
       return body
     }
 
@@ -230,7 +230,7 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
         body: JSON.stringify(payload),
       })
       const body = await response.json().catch(() => null)
-      if (!response.ok || !body?.ok) throw new Error(body?.error ?? `保存失败（${response.status}）`)
+      if (!response.ok || !body?.ok) throw new Error(body?.error ?? `Save failed (${response.status}）`)
       return body
     }
 
@@ -325,7 +325,7 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
     }
 
     function providerLabel(id, name) {
-      return id === 'deepseek-account' ? 'DeepSeek 账号' : name || id
+      return id === 'deepseek-account' ? 'DeepSeek Account' : name || id
     }
 
     function groupModels(models) {
@@ -713,7 +713,7 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
       }
 
       const emptyMessage =
-        models.length === 0 ? '暂无可用模型' : filteredGroups.length === 0 ? '无匹配模型' : null
+        models.length === 0 ? 'No models available' : filteredGroups.length === 0 ? 'No matching models' : null
 
       let rowIndex = 0
       const inheritShown = query.trim() === ''
@@ -726,7 +726,7 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
           className: 'dsm-menu',
           style: menuStyle(position),
           role: 'group',
-          'aria-label': '模型',
+          'aria-label': 'Model',
           onKeyDown: onMenuKeyDown,
           onMouseDown: (event) => {
             if (showSearch && event.target instanceof Element && event.target.closest('button') !== null) {
@@ -743,11 +743,11 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
                 className: cx('dsm-search', query !== '' && 'dsm-searchWithQuery'),
                 type: 'text',
                 role: 'searchbox',
-                'aria-label': '搜索模型…',
+                'aria-label': 'Search models...',
                 'aria-controls': `${id}-list`,
                 'aria-activedescendant':
                   highlight >= 0 && highlight < visibleRows.length ? `${id}-row-${highlight}` : undefined,
-                placeholder: '搜索模型…',
+                placeholder: 'Search models...',
                 value: query,
                 onChange: (event) => changeQuery(event.target.value),
                 onKeyDown: onSearchKeyDown,
@@ -758,7 +758,7 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
                     {
                       type: 'button',
                       className: 'dsm-searchClear',
-                      'aria-label': '清除搜索',
+                      'aria-label': 'Clear search',
                       disabled: pending,
                       onClick: () => {
                         changeQuery('')
@@ -777,7 +777,7 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
             id: `${id}-list`,
             className: 'dsm-groups',
             role: 'menu',
-            'aria-label': '选择模型',
+            'aria-label': 'Select model',
           },
           inheritShown
             ? h(
@@ -881,7 +881,7 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
 
       const options = useMemo(
         () => [
-          { key: 'model-default', effort: null, label: '模型默认' },
+          { key: 'model-default', effort: null, label: 'Model default' },
           ...efforts.map((effort) => ({ key: `effort:${effort.id}`, effort: effort.id, label: effort.name })),
         ],
         [efforts],
@@ -924,14 +924,14 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
           className: 'dsm-menu',
           style: menuStyle(position),
           role: 'group',
-          'aria-label': '思考强度',
+          'aria-label': 'Reasoning effort',
           onKeyDown: onMenuKeyDown,
         },
         efforts.length === 0
-          ? h('div', { className: 'dsm-empty', role: 'status' }, '该模型不公布思考强度')
+          ? h('div', { className: 'dsm-empty', role: 'status' }, 'This model does not declare reasoning efforts')
           : h(
               'div',
-              { className: 'dsm-groups', role: 'menu', 'aria-label': '选择思考强度' },
+              { className: 'dsm-groups', role: 'menu', 'aria-label': 'Select reasoning effort' },
               options.map((option, index) => {
                 const selected = option.effort === (route?.effort ?? null)
                 return h(
@@ -982,7 +982,7 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
       const globalRoute = data?.global?.default ?? null
       const sessionRoute = data?.session?.default ?? null
       const effective = sessionRoute ?? globalRoute ?? null
-      const source = sessionRoute ? '本对话' : globalRoute ? '全局默认' : '主会话'
+      const source = sessionRoute ? 'This session' : globalRoute ? 'Global default' : 'Main session'
 
       const width = 380
       const margin = 12
@@ -994,7 +994,7 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
       const bottom = overlayAnchor ? Math.max(margin, Math.round(viewHeight - overlayAnchor.top + 10)) : 104
 
       const route = scope === 'session' ? sessionRoute : globalRoute
-      const inheritLabel = scope === 'session' ? '跟随全局' : '跟随主会话'
+      const inheritLabel = scope === 'session' ? 'Follow global' : 'Follow main session'
       const model = findModel(models, route)
       const efforts = model?.efforts ?? []
       const modelsAvailable = models.length > 0
@@ -1003,14 +1003,14 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
           ? '—'
           : route.effort
             ? efforts.find((effort) => effort.id === route.effort)?.name ?? route.effort
-            : '模型默认'
+            : 'Model default'
       const effortTitle = !modelsAvailable
-        ? '模型目录不可用'
+        ? 'Model catalog unavailable'
         : !route
-          ? '先选择模型'
+          ? 'Choose a model first'
           : efforts.length === 0
-            ? '该模型不公布思考强度'
-            : '思考强度'
+            ? 'This model does not declare reasoning efforts'
+            : 'Reasoning effort'
       const effortDisabled = !modelsAvailable || !route || efforts.length === 0
 
       const closeCard = useCallback(() => overlay.set({ open: false, sessionId: null, anchor: null }), [])
@@ -1074,7 +1074,7 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
         {
           ref: cardRef,
           role: 'dialog',
-          'aria-label': '子代理模型与思考强度',
+          'aria-label': 'Subagent model & reasoning effort',
           className: 'dsm-card',
           style: {
             pointerEvents: 'auto',
@@ -1096,8 +1096,8 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
         h(
           'div',
           { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 } },
-          h('div', { className: 'dsm-cardTitle' }, '子代理'),
-          h(Pill, { active: Boolean(sessionRoute) }, sessionRoute ? '本对话已覆盖' : '本对话跟随全局'),
+          h('div', { className: 'dsm-cardTitle' }, 'Subagent'),
+          h(Pill, { active: Boolean(sessionRoute) }, sessionRoute ? 'This session is overridden' : 'This session follows global'),
         ),
         h(
           'div',
@@ -1106,17 +1106,17 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
             id: 'dsm-scope',
             value: scope,
             options: [
-              { value: 'session', label: '本对话' },
-              { value: 'global', label: '全局默认' },
+              { value: 'session', label: 'This session' },
+              { value: 'global', label: 'Global default' },
             ],
             onChange: setScope,
-            label: '设置范围',
+            label: 'Scope',
             disabled: pending,
           }),
           h(
             'span',
             { className: 'dsm-caption', style: { marginLeft: 'auto', whiteSpace: 'nowrap' } },
-            scope === 'session' ? '只影响当前对话' : '影响所有未覆盖的对话',
+            scope === 'session' ? 'Affects this conversation only' : 'Applies to all sessions without an override',
           ),
         ),
         h(
@@ -1132,7 +1132,7 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
               'aria-expanded': picker === 'model',
               onClick: () => setPicker(picker === 'model' ? null : 'model'),
             },
-            h('span', { className: 'dsm-cellLabel' }, '模型'),
+            h('span', { className: 'dsm-cellLabel' }, 'Model'),
             h('span', { className: 'dsm-cellValue' }, route ? model?.name ?? routeText(route) : inheritLabel),
             h(Icon, { name: 'chevronRight', className: 'dsm-cellChevron' }),
           ),
@@ -1148,7 +1148,7 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
               'aria-expanded': picker === 'effort',
               onClick: () => setPicker(picker === 'effort' ? null : 'effort'),
             },
-            h('span', { className: 'dsm-cellLabel' }, '思考强度'),
+            h('span', { className: 'dsm-cellLabel' }, 'Reasoning effort'),
             h('span', { className: 'dsm-cellValue' }, effortValue),
             h(Icon, { name: 'chevronRight', className: 'dsm-cellChevron' }),
           ),
@@ -1157,15 +1157,15 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
           ? h(
               'div',
               { className: 'dsm-caption' },
-              `全局默认：${globalRoute ? routeText(globalRoute) : '未设置'}`,
+              `Global default：${globalRoute ? routeText(globalRoute) : 'Not set'}`,
             )
           : null,
         h(
           'div',
           { className: 'dsm-caption' },
           effective
-            ? `下一次委派将使用 ${routeText(effective)}（来源：${source}）`
-            : '未配置：下一次委派跟随主会话路由',
+            ? `Next delegation will use ${routeText(effective)} (from: ${source}）`
+            : 'Not set: the next delegation follows the main session route',
         ),
         h(
           'div',
@@ -1177,11 +1177,11 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
               ? h(
                   'button',
                   { type: 'button', className: 'dsm-btn', onClick: () => commit(null, 'inherit') },
-                  '清除本对话覆盖',
+                  'Clear this session override',
                 )
               : null,
           ),
-          h('button', { type: 'button', className: 'dsm-btn', onClick: closeCard }, '完成'),
+          h('button', { type: 'button', className: 'dsm-btn', onClick: closeCard }, 'Done'),
         ),
         h(ErrorLine, { message: error, onRetry: reload }),
         picker === 'model'
@@ -1215,7 +1215,7 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
         'div',
         { className: 'dsm-error' },
         h('span', null, message),
-        onRetry ? h('button', { type: 'button', className: 'dsm-retry', onClick: onRetry }, '重试') : null,
+        onRetry ? h('button', { type: 'button', className: 'dsm-retry', onClick: onRetry }, 'Retry') : null,
       )
     }
 
@@ -1255,7 +1255,7 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
       const sessionRoute = data?.session?.default ?? null
       const effective = sessionRoute ?? globalRoute ?? null
       const isOpen = overlayState.open && overlayState.sessionId === sessionId
-      const label = effective ? `子代理 ${routeText(effective)}` : '子代理 跟随主会话'
+      const label = effective ? `Subagent ${routeText(effective)}` : 'Subagent follows main session'
 
       return h(
         'button',
@@ -1276,8 +1276,8 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
             })
           },
           title: effective
-            ? `子代理将使用 ${effective.provider}/${effective.model}${effective.effort ? `（${effective.effort}）` : ''}${sessionRoute ? '，来源：本对话' : '，来源：全局默认'}`
-            : '未配置子代理模型，跟随主会话',
+            ? `Subagent will use ${effective.provider}/${effective.model}${effective.effort ? `（${effective.effort}）` : ''}${sessionRoute ? ', from: this conversation' : ', from: global default'}`
+            : 'Subagent model unset - follows the main session',
           'aria-label': label,
           'aria-haspopup': 'dialog',
           'aria-expanded': isOpen,
@@ -1304,13 +1304,6 @@ html[data-platform=darwin] .dsm-groupHeading{border-radius:0}
         ctx.slots.inject('shell.overlay', () =>
           ctx.slots.register({ name: 'shell.overlay', id: 'subagent-routing', order: 50 }, RouteOverlay),
         )
-        // One-shot health note: proves this module reached the Host face from the
-        // page. No user data, no token, no URL beyond the origin.
-        void fetch(`${ENDPOINT}/hello`, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ origin: location.origin, scope: 'client-loaded', rev: 8 }),
-        }).catch(() => {})
       },
     }
   },
